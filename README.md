@@ -1,0 +1,9 @@
+# DSA Parser
+
+DSA Parser is a Go library and CLI tool for parsing Data Structures and Algorithms (DSA) Go files and generating markdown notes.
+
+## Installation
+
+```bash
+go get github.com/andy4747/go-doc-parser
+```
