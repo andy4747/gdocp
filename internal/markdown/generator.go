@@ -16,7 +16,6 @@ func GenerateMarkdown(fileInfo *models.FileInfo) (string, error) {
 		return "", err
 	}
 	codeBlock := fmt.Sprintf("```go\n%s\n```", code)
-	fmt.Println(codeBlock)
 	return fmt.Sprintf(`# Notes
 
 **Author**: %s

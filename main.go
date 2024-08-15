@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/andy4747/gdocp/internal/markdown"
 	"github.com/andy4747/gdocp/internal/parser"
@@ -41,10 +40,10 @@ func processFile(inputFile, outputFile string) error {
 		return fmt.Errorf("skipped generating markdown for %s: Author or File is empty", inputFile)
 	}
 
-	err = markdown.WriteToFile(mdContent, outputFile)
-	if err != nil {
-		return fmt.Errorf("failed to write markdown file: %v", err)
-	}
+	//err = markdown.WriteToFile(mdContent, outputFile)
+	//if err != nil {
+	//	return fmt.Errorf("failed to write markdown file: %v", err)
+	//}
 
 	fmt.Printf("Markdown file generated: %s\n", outputFile)
 	return nil
@@ -53,43 +52,18 @@ func processFile(inputFile, outputFile string) error {
 func main() {
 	inputFile := flag.String("input", "", "Input Go file to parse")
 	outputFile := flag.String("output", "output.md", "Output markdown file")
-	recursive := flag.Bool("r", false, "Recursively parse Go files in subdirectories")
 	httpAddr := flag.String("http", "", "Start HTTP server on the specified address (e.g., :6060)")
 	flag.Parse()
 
-	if *inputFile == "" && !*recursive && *httpAddr == "" {
-		log.Fatal("Either an input file must be specified, the -r flag must be used for recursive processing, or the -http flag must be used to start the HTTP server")
+	if *inputFile == "" && *httpAddr == "" {
+		log.Fatal("Either an input file must be specified or the -http flag must be used to start the HTTP server")
 	}
 
-	outputDir, err := createOutputDir()
-	if err != nil {
-		log.Fatalf("Failed to set up output directory: %v", err)
-	}
-
-	if *recursive || *httpAddr != "" {
-		docMap, err = parser.GenerateMarkdownRecursively(".")
+	if *inputFile != "" {
+		outputDir, err := createOutputDir()
 		if err != nil {
-			log.Fatalf("Failed to process directory recursively: %v", err)
+			log.Fatalf("Failed to set up output directory: %v", err)
 		}
-
-		// Remove entries with empty content
-		for id, content := range docMap {
-			if content.Content == "" {
-				delete(docMap, id)
-			}
-		}
-
-		if *recursive {
-			for _, content := range docMap {
-				outputFilePath := filepath.Join(outputDir, strings.TrimSuffix(filepath.Base(content.Path), ".go")+".md")
-				if err := markdown.WriteToFile(content.Content, outputFilePath); err != nil {
-					log.Printf("Failed to write markdown file %s: %v", outputFilePath, err)
-				} else {
-					fmt.Printf("Markdown file generated: %s\n", outputFilePath)
-				}
-			}
-		}
-	} else if *inputFile != "" {
 		// Process single file
 		outputFilePath := filepath.Join(outputDir, *outputFile)
 		if err := processFile(*inputFile, outputFilePath); err != nil {
@@ -104,6 +78,11 @@ func main() {
 }
 
 func startHTTPServer(addr string) {
+	genMap, err := parser.GenerateMarkdownRecursively(".")
+	if err != nil {
+		panic("couldnt generate markdown")
+	}
+	docMap = genMap
 	http.HandleFunc("/", handleListDocs)
 	http.HandleFunc("/doc", handleViewDoc)
 
