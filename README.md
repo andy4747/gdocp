@@ -5,5 +5,5 @@ DSA Parser is a Go library and CLI tool for parsing Data Structures and Algorith
 ## Installation
 
 ```bash
-go get github.com/andy4747/gdocp
+go install github.com/andy4747/gdocp/cmd/gdocp@latest
 ```
