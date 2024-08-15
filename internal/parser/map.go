@@ -7,20 +7,17 @@ import (
 	"strings"
 
 	"github.com/andy4747/gdocp/internal/markdown"
-
-	"github.com/google/uuid"
 )
 
 // MarkdownContent contains the Markdown content and associated metadata.
 type MarkdownContent struct {
-	ID      uuid.UUID
 	Path    string
 	Content string
 }
 
 // GenerateMarkdownRecursively processes all Go files in a directory recursively and stores generated markdown content in a map.
-func GenerateMarkdownRecursively(baseDir string) (map[uuid.UUID]MarkdownContent, error) {
-	result := make(map[uuid.UUID]MarkdownContent)
+func GenerateMarkdownRecursively(baseDir string) (map[string]MarkdownContent, error) {
+	result := make(map[string]MarkdownContent)
 	err := filepath.Walk(baseDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -51,14 +48,12 @@ func GenerateMarkdownRecursively(baseDir string) (map[uuid.UUID]MarkdownContent,
 				}
 
 				// Generate a UUID for the markdown content
-				id := uuid.New()
-				result[id] = MarkdownContent{
-					ID:      id,
+				result[path] = MarkdownContent{
 					Path:    path,
 					Content: mdContent,
 				}
 
-				fmt.Printf("Markdown for file %s generated with ID %s\n", path, id.String())
+				fmt.Printf("Markdown for file %s\n", path)
 			}
 		}
 

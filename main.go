@@ -12,11 +12,9 @@ import (
 
 	"github.com/andy4747/gdocp/internal/markdown"
 	"github.com/andy4747/gdocp/internal/parser"
-
-	"github.com/google/uuid"
 )
 
-var docMap map[uuid.UUID]parser.MarkdownContent
+var docMap map[string]parser.MarkdownContent
 
 // createOutputDir ensures that the output directory exists and returns its path.
 func createOutputDir() (string, error) {
@@ -125,8 +123,8 @@ func handleListDocs(w http.ResponseWriter, r *http.Request) {
 	<body>
 		<h1>Document List</h1>
 		<ul>
-		{{range $id, $content := .}}
-			<li><a href="/doc?doc_id={{$id}}">{{$content.Path}}</a></li>
+		{{range $path, $content := .}}
+			<li><a href="/doc?path={{$path}}">{{$content.Path}}</a></li>
 		{{end}}
 		</ul>
 	</body>
@@ -144,14 +142,9 @@ func handleListDocs(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleViewDoc(w http.ResponseWriter, r *http.Request) {
-	docIDStr := r.URL.Query().Get("doc_id")
-	docID, err := uuid.Parse(docIDStr)
-	if err != nil {
-		http.Error(w, "Invalid document ID", http.StatusBadRequest)
-		return
-	}
+	docPath := r.URL.Query().Get("path")
 
-	content, ok := docMap[docID]
+	content, ok := docMap[docPath]
 	if !ok {
 		http.Error(w, "Document not found", http.StatusNotFound)
 		return
